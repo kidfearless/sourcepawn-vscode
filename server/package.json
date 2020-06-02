@@ -1,8 +1,8 @@
 {
-	"name": "sourcepawn-lsp-server",
-	"description": "Server part of sourcepawn language server",
-	"version": "0.0.3",
-	"author": "KiD Fearless",
+	"name": "sourcepawn-vscode",
+	"description": "SourcePawn highlighting and autocompletion.",
+	"version": "0.1.4",
+	"author": "Dreae",
 	"license": "MIT",
 	"engines": {
 		"node": "*"

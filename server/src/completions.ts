@@ -10,6 +10,7 @@ import * as glob from 'glob';
 import * as path from 'path';
 import Uri from 'vscode-uri';
 import * as fs from 'fs';
+import URI from 'vscode-uri';
 
 export interface Completion
 {
@@ -239,8 +240,17 @@ export class CompletionRepository
 		}
 	}
 
-	parse_sm_api(sourcemod_home: string)
+	parse_sm_api(sourcemod_home: string, main:null|string = null)
 	{
+		if(main)
+		{
+			let completions = new FileCompletions(main);
+			let rel = path.relative(sourcemod_home, main);
+			parse_file(rel, completions);
+
+			let uri = "file://__sourcemod_builtin/" + rel;
+			this.completions.set(uri, completions);
+		}
 		glob(path.join(sourcemod_home, '**/*.inc'), (err, files) =>
 		{
 			for (let file of files)

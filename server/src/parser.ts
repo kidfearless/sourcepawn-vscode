@@ -3,9 +3,13 @@ import * as fs from 'fs';
 
 export function parse_file(file: string, completions: FileCompletions)
 {
-	fs.readFile(file, "utf-8", (err, data) =>
+	fs.readFile(file, "utf-8", function (err, data)
 	{
 		parse_blob(data, completions);
+		if(err)
+		{
+			console.error(err);
+		}
 	});
 }
 

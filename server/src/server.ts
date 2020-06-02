@@ -9,6 +9,7 @@ import * as path from 'path';
 
 import { Completion, CompletionRepository } from './completions';
 import { parse_file } from './parser';
+import URI from 'vscode-uri';
 
 let connection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
 let documents = new TextDocuments();

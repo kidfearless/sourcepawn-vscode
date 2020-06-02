@@ -1,4 +1,4 @@
-import { ExtensionContext, Disposable, workspace, window, StatusBarAlignment, commands } from 'vscode';
+import { ExtensionContext, Disposable, workspace, window, StatusBarAlignment, commands, DocumentSelector } from 'vscode';
 import { LanguageClient, LanguageClientOptions, SettingMonitor, ServerOptions, TransportKind } from 'vscode-languageclient';
 import * as glob from 'glob';
 import * as path from 'path';
