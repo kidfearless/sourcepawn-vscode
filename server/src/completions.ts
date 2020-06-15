@@ -213,30 +213,15 @@ export class FileCompletions
 
 	resolve_import(file: string, relative: boolean = false)
 	{
-		let uri = file + ".inc";
 		if (!relative)
 		{
-			uri = "file://__sourcemod_builtin/" + uri;
+			let uri = "file://__sourcemod_builtin/" + file + ".inc";
 			this.add_include(uri);
-		} else
+		}
+		else
 		{
-			let base_file = Files.uriToFilePath(this.uri);
-			if (!base_file)
-			{
-				return;
-			}
-			let base_directory = path.dirname(base_file);
-
-			let inc_file = path.resolve(base_directory, uri);
-			if (fs.existsSync(inc_file))
-			{
-				uri = Uri.file(inc_file).toString();
-				this.add_include(uri);
-			} else
-			{
-				uri = Uri.file(path.resolve(file + ".sp")).toString();
-				this.add_include(uri);
-			}
+			let uri = "file://__sourcemod_builtin/" + file;
+			this.add_include(uri);
 		}
 	}
 }
@@ -355,10 +340,14 @@ export class CompletionRepository
 			this.get_included_files(completions, includes);
 		}
 
-		return [...includes].map((file) =>
+		let mapped = [...includes].map((file) =>
 		{
 			return this.get_file_completions(file);
-		}).reduce((completions, file_completions) => completions.concat(file_completions), []);
+		});
+
+
+		let reduced = mapped.reduce((completions, file_completions) => completions.concat(file_completions), []);
+		return reduced;
 	}
 
 	get_file_completions(file: string): Completion[]

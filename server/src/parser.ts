@@ -80,7 +80,7 @@ class Parser
 			return this.parse();
 		}
 
-		match = line.match(/^\s*#include\s+"([A-Za-z0-9\-_\/]+)"\s*$/);
+		match = line.match(/^\s*#include\s+"([A-Za-z0-9\-_\/.]+)"\s*$/);
 		if (match)
 		{
 			this.completions.resolve_import(match[1], true);
@@ -146,6 +146,30 @@ class Parser
 			return this.parse();
 		}
 
+		match = line.match(/\s*(?:(?:static|native|stock|public)+\s*)+\s+(?:[a-zA-Z\-_0-9]:)?([^\s]+)\s*\(\s*([A-Za-z_].*)/);
+		if (match)
+		{
+			this.completions.add(match[1], new FunctionCompletion(match[1], match[2], "", []));
+		}
+
+		match = line.match(/\s*(?:(?:static|native|stock|public)+\s*)+\s+([^\s]+)\s*([A-Za-z_].*)/);
+		if (match)
+		{
+			let name_match = match[2].match(/^([A-Za-z_][A-Za-z0-9_]*)/);
+			if(name_match)
+			{
+
+				if (this.state[this.state.length - 1] === State.Methodmap)
+				{
+					this.completions.add(name_match[1], new MethodCompletion(this.state_data.name, name_match[1], match[2], "", []));
+				}
+				else
+				{
+					this.completions.add(name_match[1], new FunctionCompletion(name_match[1], match[2], "", []));
+				}
+			}
+		}
+
 		this.parse();
 	}
 
@@ -155,7 +179,7 @@ class Parser
 		{
 			return; // EOF
 		}
-
+		// Check if the comment ends here
 		let match: any = (use_line_comment) ? !/^\s*\/\//.test(current_line) : /\*\//.test(current_line);
 		if (match)
 		{
@@ -176,12 +200,14 @@ class Parser
 
 			this.state.pop();
 			return this.parse();
-		} else
+		}
+		else
 		{
 			if (!use_line_comment)
 			{
 				match = current_line.match(/^\s*\*\s*@(?:param|return)\s*([A-Za-z_\.][A-Za-z0-9_\.]*)\s*(.*)/);
-			} else
+			}
+			else
 			{
 				match = current_line.match(/^\s*\/\/\s*@(?:param|return)\s*([A-Za-z_\.][A-Za-z0-9_\.]*)\s*(.*)/);
 			}
@@ -211,7 +237,8 @@ class Parser
 		if (line.includes(":"))
 		{
 			this.read_old_style_function(line);
-		} else
+		}
+		else
 		{
 			this.read_new_style_function(line);
 		}
