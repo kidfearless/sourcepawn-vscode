@@ -1,9 +1,9 @@
-import { FileCompletions, FunctionCompletion, DefineCompletion, FunctionParam, MethodCompletion } from './completions';
+import { FileCompletions, FunctionCompletion, DefineCompletion, FunctionParam, MethodCompletion, ClassCompletion, PropertyCompletion } from './completions';
 import * as fs from 'fs';
 
 export function parse_file(file: string, completions: FileCompletions)
 {
-	fs.readFile(file, "utf-8", function (err, data)
+	fs.readFile(file, "utf-8", (err, data) =>
 	{
 		parse_blob(data, completions);
 		if(err)
@@ -118,6 +118,9 @@ class Parser
 				name: match[1]
 			};
 
+			let methodmap = new ClassCompletion(match[1]);
+			this.completions.add(methodmap.name, methodmap);
+
 			return this.parse();
 		}
 
@@ -128,6 +131,9 @@ class Parser
 			{
 				this.state.push(State.Property);
 			}
+
+			let property = new PropertyCompletion(match[1]);
+			this.completions.add(property.name, property);
 
 			return this.parse();
 		}

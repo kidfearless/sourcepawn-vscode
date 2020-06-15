@@ -125,6 +125,53 @@ export class DefineCompletion implements Completion
 	}
 }
 
+export class ClassCompletion implements Completion
+{
+	name: string;
+	kind = CompletionItemKind.Class;
+
+	constructor(name: string)
+	{
+		this.name = name;
+	}
+
+	to_completion_item(): CompletionItem
+	{
+		return {
+			label: this.name,
+			kind: this.kind,
+		};
+	}
+
+	get_signature(): SignatureInformation
+	{
+		return { label: "" };
+	}
+}
+export class PropertyCompletion implements Completion
+{
+	name: string;
+	kind = CompletionItemKind.Property;
+
+	constructor(name: string)
+	{
+		this.name = name;
+	}
+
+	to_completion_item(): CompletionItem
+	{
+		return {
+			label: this.name,
+			kind: this.kind,
+		};
+	}
+
+	get_signature(): SignatureInformation
+	{
+		return { label: "" };
+	}
+}
+
 export class FileCompletions
 {
 	completions: Map<string, Completion>;
