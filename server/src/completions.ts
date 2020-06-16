@@ -168,7 +168,34 @@ export class PropertyCompletion implements Completion
 
 	get_signature(): SignatureInformation
 	{
-		return { label: "" };
+		return { label: this.name };
+	}
+}
+
+export class VariableCompletion implements Completion
+{
+	name: string;
+	kind = CompletionItemKind.Variable;
+	datatype: string;
+
+	constructor(type:string, name: string)
+	{
+		this.name = name;
+		this.datatype = type;
+	}
+
+	to_completion_item(): CompletionItem
+	{
+		return {
+			label: this.name,
+			kind: this.kind,
+			detail: this.datatype
+		};
+	}
+
+	get_signature(): SignatureInformation
+	{
+		return { label: this.datatype + ' ' + this.name };
 	}
 }
 
@@ -228,33 +255,38 @@ export class FileCompletions
 
 export class CompletionRepository
 {
-	completions: Map<string, FileCompletions>;
+	CompletionMap: Map<string, FileCompletions>;
 	documents: TextDocuments;
 
 	constructor(documents: TextDocuments)
 	{
-		this.completions = new Map();
+		this.CompletionMap = new Map();
 		this.documents = documents;
 
 		documents.onDidOpen(this.handle_document_change.bind(this));
 		documents.onDidChangeContent(this.handle_document_change.bind(this));
 	}
 
-	handle_document_change(event: TextDocumentChangeEvent)
+	getAllCompletions()
 	{
-		let completions = new FileCompletions(event.document.uri);
-		parse_blob(event.document.getText(), completions);
-
-		this.read_unscanned_imports(completions);
-
-		this.completions.set(event.document.uri, completions);
+		return Array.from(this.CompletionMap.values());
 	}
 
-	read_unscanned_imports(completions: FileCompletions)
+	handle_document_change(event: TextDocumentChangeEvent)
 	{
-		for (let import_file of completions.includes)
+		let fileCompletion = new FileCompletions(event.document.uri);
+		parse_blob(event.document.getText(), fileCompletion);
+
+		this.read_unscanned_imports(fileCompletion);
+
+		this.CompletionMap.set(event.document.uri, fileCompletion);
+	}
+
+	read_unscanned_imports(fileCompletion: FileCompletions)
+	{
+		for (let import_file of fileCompletion.includes)
 		{
-			let completion = this.completions.get(import_file);
+			let completion = this.CompletionMap.get(import_file);
 			if (!completion)
 			{
 				let file = Files.uriToFilePath(import_file);
@@ -267,31 +299,22 @@ export class CompletionRepository
 
 				this.read_unscanned_imports(new_completions);
 
-				this.completions.set(import_file, new_completions);
+				this.CompletionMap.set(import_file, new_completions);
 			}
 		}
 	}
 
-	parse_sm_api(sourcemod_home: string, main:null|string = null)
+	parse_sm_api(sourcemod_home: string)
 	{
-		if(main)
-		{
-			let completions = new FileCompletions(main);
-			let rel = path.relative(sourcemod_home, main);
-			parse_file(rel, completions);
-
-			let uri = "file://__sourcemod_builtin/" + rel;
-			this.completions.set(uri, completions);
-		}
 		glob(path.join(sourcemod_home, '**/*.inc'), (err, files) =>
 		{
 			for (let file of files)
 			{
-				let completions = new FileCompletions(Uri.file(file).toString());
-				parse_file(file, completions);
+				let fileCompletion = new FileCompletions(Uri.file(file).toString());
+				parse_file(file, fileCompletion);
 
 				let uri = "file://__sourcemod_builtin/" + path.relative(sourcemod_home, file);
-				this.completions.set(uri, completions);
+				this.CompletionMap.set(uri, fileCompletion);
 			}
 		});
 	}
@@ -323,21 +346,30 @@ export class CompletionRepository
 
 		if (is_method)
 		{
-			return all_completions.filter(completion => completion.kind === CompletionItemKind.Method);
-		} else
+			return all_completions.filter(completion => 
+			{
+				return completion.kind === CompletionItemKind.Method
+					|| completion.kind === CompletionItemKind.Property;
+			});
+		}
+		else
 		{
-			return all_completions.filter(completion => completion.kind !== CompletionItemKind.Method);
+			return all_completions.filter(completion =>
+			{
+				return completion.kind !== CompletionItemKind.Method
+					&& completion.kind !== CompletionItemKind.Property;
+			});
 		}
 	}
 
 	get_all_completions(file: string): Completion[]
 	{
-		let completions = this.completions.get(file);
+		let fileCompletion = this.CompletionMap.get(file);
 
 		let includes = new Set<string>();
-		if(completions)
+		if(fileCompletion)
 		{
-			this.get_included_files(completions, includes);
+			this.get_included_files(fileCompletion, includes);
 		}
 
 		let mapped = [...includes].map((file) =>
@@ -352,7 +384,7 @@ export class CompletionRepository
 
 	get_file_completions(file: string): Completion[]
 	{
-		let completions = this.completions.get(file);
+		let completions = this.CompletionMap.get(file);
 		if (completions)
 		{
 			return completions.get_completions(this);
@@ -368,7 +400,7 @@ export class CompletionRepository
 			if (!files.has(include))
 			{
 				files.add(include);
-				let include_completions = this.completions.get(include);
+				let include_completions = this.CompletionMap.get(include);
 				if (include_completions)
 				{
 					this.get_included_files(include_completions, files);

@@ -15,7 +15,7 @@ let connection = createConnection(new IPCMessageReader(process), new IPCMessageW
 let documents = new TextDocuments();
 documents.listen(connection);
 
-let completions = new CompletionRepository(documents);
+export let completionRepository = new CompletionRepository(documents);
 
 let workspaceRoot: string;
 let sm_home:string;
@@ -42,7 +42,7 @@ connection.onDidChangeConfiguration((change: DidChangeConfigurationParams) =>
 	sm_home = change.settings.sourcepawnLanguageServer.sourcemod_home;
 	if (sm_home)
 	{
-		completions.parse_sm_api(sm_home);
+		completionRepository.parse_sm_api(sm_home);
 	}
 });
 
@@ -50,18 +50,18 @@ connection.onDidSaveTextDocument((params: DidSaveTextDocumentParams) =>
 {
 	if (sm_home)
 	{
-		completions.parse_sm_api(sm_home);
+		completionRepository.parse_sm_api(sm_home);
 	}
 });
 
 connection.onCompletion((textDocumentPosition) =>
 {
-	return completions.get_completions(textDocumentPosition);
+	return completionRepository.get_completions(textDocumentPosition);
 });
 
 connection.onSignatureHelp((textDocumentPosition) =>
 {
-	return completions.get_signature(textDocumentPosition);
+	return completionRepository.get_signature(textDocumentPosition);
 });
 
 connection.listen();
