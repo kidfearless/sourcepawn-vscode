@@ -2,5 +2,20 @@
 	"editor.insertSpaces": false,
 	"tslint.enable": true,
 	"typescript.tsc.autoDetect": "off",
-	"typescript.preferences.quoteStyle": "single"
+	"typescript.preferences.quoteStyle": "single",
+	"files.associations": {
+		"AMBuildScript": "python",
+		"*.sp": "sourcepawn",
+		"*.phrases.txt": "vdf",
+		"*.txt": "plaintext",
+		"message.txt": "sourcepawn",
+		"*.inc": "c"
+	},
+	"files.exclude": {
+		"**/out": true,
+		"**/node_modules": true,
+		"client/server": true,
+		"**/.vscode-test": true,
+		"**/*.vsix": true
+	}
 }

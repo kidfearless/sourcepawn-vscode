@@ -1,22 +1,25 @@
 {
 	"name": "sourcepawn-vscode",
 	"description": "SourcePawn highlighting and autocompletion.",
+	"publisher": "KiDFearless",
 	"version": "0.1.4",
 	"author": "Dreae",
 	"license": "MIT",
 	"engines": {
-		"node": "*"
+		"node": "*",
+		"vscode": "^1.22.0"
 	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/kidfearless/sourcepawn-LSP"
 	},
-	"dependencies": {
-		"vscode": "^1.1.36",
-		"vscode-languageserver": "^5.2.1"
-	},
+	"dependencies": {},
 	"scripts": {},
 	"devDependencies": {
-		"@types/glob": "^7.1.1"
+		"@types/glob": "^7.1.2",
+		"glob": "^7.1.6",
+		"minimist": "^1.2.5",
+		"vscode": "^1.1.37",
+		"vscode-languageserver": "^5.2.1"
 	}
 }

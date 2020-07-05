@@ -1,11 +1,10 @@
 {
-	"name": "sourcepawn-vscode",
+    "name": "sourcepawn-vscode",
     "displayName": "SourcePawn",
     "description": "SourcePawn highlighting and autocompletion.",
     "version": "0.1.4",
     "publisher": "Dreae",
     "main": "out/index",
-    "icon": "sm.png",
     "repository": {
         "type": "git",
         "url": "https://github.com/Dreae/sourcepawn-vscode.git"
@@ -62,14 +61,15 @@
             }
         ]
     },
-	"scripts": {
-		"update-vscode": "vscode-install",
-		"postinstall": "vscode-install"
-	},
-	"dependencies": {
-		"vscode-languageclient": "^5.2.1"
-	},
-	"devDependencies": {
-		"vscode": "^1.1.35"
-	}
+    "scripts": {
+        "update-vscode": "vscode-install",
+        "postinstall": "vscode-install"
+    },
+    "dependencies": {
+        "glob": "^7.1.6",
+        "vscode-languageclient": "^5.2.1"
+    },
+    "devDependencies": {
+        "vscode": "^1.1.35"
+    }
 }

@@ -46,13 +46,14 @@
 	},
 	"devDependencies": {
 		"@types/mocha": "^5.2.7",
-		"@types/node": "^8.10.60",
+		"@types/node": "^8.10.61",
 		"tslint": "^5.20.1",
-		"typescript": "^3.8.3"
+		"typescript": "^3.9.6"
 	},
 	"dependencies": {
 		"fs": "0.0.1-security",
+		"glob": "^7.1.6",
 		"vscode-languageserver": "^5.2.1",
-		"vscode-uri": "^2.1.1"
+		"vscode-uri": "^2.1.2"
 	}
 }
