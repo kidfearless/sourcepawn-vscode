@@ -12,6 +12,40 @@ import Uri from 'vscode-uri';
 import * as fs from 'fs';
 import URI from 'vscode-uri';
 
+
+
+
+declare global
+{
+	interface Set<T>
+	{
+		toArray():Array<T>;
+	}
+	interface Array<T>
+	{
+		toSet<T>():Set<T>;
+	}
+	interface Map<K, V>
+	{
+		toArray():Array<V>;
+	}
+}
+
+Set.prototype.toArray = function()
+{
+	return Array.from(this.values());
+};
+
+Map.prototype.toArray = function()
+{
+	return Array.from(this.values());
+};
+
+Array.prototype.toSet = function()
+{
+	return new Set(this.values());
+};
+
 export interface Completion
 {
 	name: string;
@@ -346,19 +380,30 @@ export class CompletionRepository
 
 		if (is_method)
 		{
-			return all_completions.filter(completion => 
+			// hotfix for duplicate methods
+			let retValue = new Map<string, CompletionItem>();
+			all_completions.filter(completion => 
 			{
 				return completion.kind === CompletionItemKind.Method
 					|| completion.kind === CompletionItemKind.Property;
+			}).forEach((item, index, array) =>
+			{
+				retValue.set(item.label, item);
 			});
+			return retValue.toArray();
 		}
 		else
 		{
-			return all_completions.filter(completion =>
+			let retValue = new Map<string, CompletionItem>();
+			all_completions.filter(completion =>
 			{
 				return completion.kind !== CompletionItemKind.Method
 					&& completion.kind !== CompletionItemKind.Property;
+			}).forEach((item, index, array) =>
+			{
+				retValue.set(item.label, item);
 			});
+			return retValue.toArray();
 		}
 	}
 

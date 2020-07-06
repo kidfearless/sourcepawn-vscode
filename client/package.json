@@ -67,6 +67,7 @@
     },
     "dependencies": {
         "glob": "^7.1.6",
+        "typescript": "^3.9.6",
         "vscode-languageclient": "^5.2.1"
     },
     "devDependencies": {
