@@ -138,7 +138,7 @@ export class MethodCompletion implements Completion
 export class DefineCompletion implements Completion
 {
 	name: string;
-	kind = CompletionItemKind.Variable;
+	kind = CompletionItemKind.Constant;
 
 	constructor(name: string)
 	{

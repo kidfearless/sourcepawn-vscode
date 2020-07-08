@@ -110,7 +110,7 @@ class Parser
 				this.consume_multiline_comment(line, true);
 				return this.parse();
 			}
-			
+
 			return this.parse();
 		}
 
@@ -159,14 +159,14 @@ class Parser
 			return this.parse();
 		}
 
-		match = line.match(/\s*(?:(?:static|native|stock|public)+\s*)+\s+(?:[a-zA-Z\-_0-9]:)?([^\s]+)\s*\(\s*([A-Za-z_].*)/);
+		match = line.match(/\s*(?:(?:static|native|stock|public|forward)+\s*)+\s+(?:[a-zA-Z\-_0-9]:)?([^\s]+)\s*\(\s*([A-Za-z_].*)/);
 		if (match)
 		{
 			this.fileCompletions.add(match[1], new FunctionCompletion(match[1], match[2], "", []));
 			return this.parse();
 		}
 
-		match = line.match(/^\s*(?:static |stock |const |public |native|forward )*\s*(?!return |else |case |delete |enum )(\w+)\s+(\w+)\(.*\)/);
+		match = line.match(/^\s*(?:static |stock |const |public |native |forward )*\s*(?!return |else |case |delete |enum )(\w+)\s+(\w+)\(.*\)/);
 		if (match)
 		{
 			let name_match = match[2].match(/^([A-Za-z_][A-Za-z0-9_]*)/);
@@ -268,7 +268,7 @@ class Parser
 			this.read_new_style_function(line);
 		}
 
-		this.state.pop();
+		// this.state.pop();
 		this.parse();
 	}
 
@@ -284,7 +284,7 @@ class Parser
 
 	read_new_style_function(line: string)
 	{
-		let match = line.match(/\s*(?:(?:static|native|stock|public)+\s*)+\s+([^\s]+)\s*([A-Za-z_].*)/);
+		let match = line.match(/\s*(?:(?:static|native|stock|public|forward)+\s*)+\s+([^\s]+)\s*([A-Za-z_].*)/);
 		if (match)
 		{
 			let { description, params } = this.parse_doc_comment();
