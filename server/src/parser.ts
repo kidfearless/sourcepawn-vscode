@@ -1,13 +1,14 @@
 import { FileCompletions, FunctionCompletion, DefineCompletion, FunctionParam, MethodCompletion, ClassCompletion, PropertyCompletion, VariableCompletion } from './completions';
 import * as fs from 'fs';
 import { completionRepository } from './server';
+import { count } from 'console';
 
 export function parse_file(file: string, fileCompletions: FileCompletions)
 {
 	fs.readFile(file, "utf-8", (err, data) =>
 	{
 		parse_blob(data, fileCompletions);
-		if(err)
+		if (err)
 		{
 			console.error(err);
 		}
@@ -59,7 +60,7 @@ class Parser
 		this.scratch = [];
 	}
 
-	parse() : undefined | any
+	parse(): undefined | any
 	{
 		let line = this.lines.shift();
 		if (typeof line === 'undefined')
@@ -125,18 +126,27 @@ class Parser
 			return this.parse();
 		}
 
-		match = line.match(/^\s*property\s+([a-zA-Z][a-zA-Z0-9_]*)\s+([a-zA-Z][a-zA-Z0-9_]*)/);
-		if (match)
+		if (this.state.includes(State.Methodmap))
 		{
-			if (this.state[this.state.length - 1] === State.Methodmap)
+			match = line.match(/^\s*property\s+([a-zA-Z][a-zA-Z0-9_]*)\s+([a-zA-Z][a-zA-Z0-9_]*)/);
+			if (match)
 			{
 				this.state.push(State.Property);
+
+
+				let property = new PropertyCompletion(match[1]);
+				this.fileCompletions.add(property.name, property);
+
+				// no body for this property
+				if(!line.includes(';'))
+				{
+					this.consumeBody(line);
+				}
+
+				this.state.pop();
+
+				return this.parse();
 			}
-
-			let property = new PropertyCompletion(match[1]);
-			this.fileCompletions.add(property.name, property);
-
-			return this.parse();
 		}
 
 		match = line.match(/}/);
@@ -158,7 +168,7 @@ class Parser
 		if (match)
 		{
 			let name_match = match[2].match(/^([A-Za-z_][A-Za-z0-9_]*)/);
-			if(name_match)
+			if (name_match)
 			{
 
 				if (this.state[this.state.length - 1] === State.Methodmap)
@@ -175,7 +185,7 @@ class Parser
 
 		// must be after functions, enums, and enum structs
 		match = line.match(/^\s*(?:static |stock |const |public )*\s*(?!return |else |case |delete |enum )(\w+)\s+(\w+)[^(\n]*$/);
-		if(match)
+		if (match)
 		{
 			let varcompletion = new VariableCompletion(match[1], match[2]);
 			this.fileCompletions.add(varcompletion.name, varcompletion);
@@ -278,7 +288,7 @@ class Parser
 			let { description, params } = this.parse_doc_comment();
 
 			let name_match = match[2].match(/^([A-Za-z_][A-Za-z0-9_]*)/);
-			if(name_match)
+			if (name_match)
 			{
 
 				if (this.state[this.state.length - 1] === State.Methodmap)
@@ -312,9 +322,9 @@ class Parser
 		})();
 
 		const paramRegex = /@param\s+([A-Za-z0-9_\.]+)\s+(.*)/;
-		
+
 		let params = [];
-		let current_param: iDocumentation|undefined = undefined;
+		let current_param: iDocumentation | undefined = undefined;
 		for (let line of this.scratch)
 		{
 			let match = line.match(paramRegex);
@@ -353,5 +363,100 @@ class Parser
 		}
 
 		return { description, params };
+	}
+
+	consumeBody(line: string)
+	{
+		// check for same line bracing style
+		let counter = 0;
+		counter = line.lastIndexOf('{') >= 0 ? 1 : 0;
+		// start the loop if we've already got our first brace
+		if (counter === 1)
+		{
+			while (counter != 0)
+			{
+				let body = this.lines.shift();
+				if (!body)
+				{
+					return;
+				}
+
+				for(let c of body)
+				{
+					if(c === '{')
+					{
+						counter++;
+					}
+					if(c === '}')
+					{
+						counter--;
+					}
+					if (counter === 0)
+					{
+						break;
+					}
+				}
+			}
+		}
+		else
+		{
+			// keep looping till we find the first brace
+			let body = this.lines.shift();
+			if(!body)
+			{
+				return;
+			}
+			let match = body.match(/\{/);
+			while (!match)
+			{
+				body = this.lines.shift();
+				if (!body)
+				{
+					return;
+				}
+				match = body.match(/\{/);
+			}
+
+			// increment the the number of opening braces found
+			counter += match.length;
+			// check for closing braces before we continue
+			match = body.match(/\}/);
+			if (match)
+			{
+				counter -= match.length;
+				if (counter === 0)
+				{
+					return;
+				}
+			}
+			// if this wasn't a single line body then we begin our loop
+			if (counter > 0)
+			{
+				while (counter !== 0)
+				{
+					body = this.lines.shift();
+					if (!body)
+					{
+						return;
+					}
+
+					for(let c of body)
+					{
+						if(c === '{')
+						{
+							counter++;
+						}
+						if(c === '}')
+						{
+							counter--;
+						}
+						if (counter === 0)
+						{
+							break;
+						}
+					}
+				}
+			}
+		}	
 	}
 }
