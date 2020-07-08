@@ -110,6 +110,8 @@ class Parser
 				this.consume_multiline_comment(line, true);
 				return this.parse();
 			}
+			
+			return this.parse();
 		}
 
 		match = line.match(/^\s*methodmap\s+([a-zA-Z][a-zA-Z0-9_]*)(?:\s+<\s+([a-zA-Z][a-zA-Z0-9_]*))?/);
